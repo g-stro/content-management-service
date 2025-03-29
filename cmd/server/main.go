@@ -17,7 +17,11 @@ func main() {
 		port = "8080"
 	}
 	// Connect to database
-	conn := database.NewConnection()
+	conn, err := database.NewConnection()
+	if err != nil {
+		slog.Error("failed to establish database connection", "error", err)
+		os.Exit(1)
+	}
 	defer conn.Close()
 	// Create multiplexer/router
 	mux := http.NewServeMux()
@@ -28,7 +32,7 @@ func main() {
 	// Setup middleware
 	handler := middleware.CorsMiddleware(mux)
 	// Create HTTP server
-	err := http.ListenAndServe(":"+port, handler)
+	err = http.ListenAndServe(":"+port, handler)
 	if err != nil {
 		slog.Error("failed to start server", "error", err)
 		os.Exit(1)

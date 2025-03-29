@@ -7,7 +7,6 @@ import (
 	"github.com/g-stro/content-service/internal/domain/content/model"
 	"github.com/g-stro/content-service/internal/domain/content/repository"
 	"github.com/g-stro/content-service/internal/response"
-	_ "github.com/lib/pq"
 	"log/slog"
 	"net/http"
 )

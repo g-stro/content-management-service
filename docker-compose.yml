@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  content-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: content_service_container
+    image: content-service
+    ports:
+      - '${SERVICE_PORT}:${SERVICE_PORT}'
+    environment:
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT}
+      DB_SSL_MODE: ${DB_SSL_MODE}
+      SERVICE_PORT: ${SERVICE_PORT}
+    depends_on:
+      - postgres
+    restart: always
+
+volumes:
+  postgres_data:
