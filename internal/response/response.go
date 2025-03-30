@@ -67,9 +67,17 @@ func HttpError(w http.ResponseWriter, err error, status int, logMsg string) {
 	slog.Error(logMsg, "error", err)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
+
+	var errorMessage string
+	if err == nil {
+		errorMessage = "no error message provided" // Handle nil error
+	} else {
+		errorMessage = err.Error()
+	}
+
 	encodeErr := json.NewEncoder(w).Encode(ErrorResponse{
 		BaseResponse: BaseResponse{Status: Error},
-		Message:      err.Error(),
+		Message:      errorMessage,
 	})
 	if encodeErr != nil {
 		slog.Error("failed to encode error response data into JSON", "error", encodeErr)
