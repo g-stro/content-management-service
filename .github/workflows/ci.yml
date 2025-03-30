@@ -1,0 +1,42 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build, Unit Test, and Integration Test
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.24
+
+      - name: Build Docker images
+        run: |
+          echo "Building Docker containers..."
+          docker-compose --env-file $ENV_FILE -p $PROJECT_NAME up --build -d
+
+      - name: Run unit tests
+        run: |
+          echo "Running unit tests..."
+          make unit-tests
+
+      - name: Run integration tests
+        run: |
+          echo "Running integration tests..."
+          make integration-tests
+
+      - name: Tear down resources
+        if: always()
+        run: |
+          echo "Cleaning up Docker containers..."
+          make down
