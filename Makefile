@@ -1,5 +1,5 @@
 PROJECT_NAME = content-service
-ENV_FILE = .env
+ENV_FILE = .env.example
 COMPOSE_FILE = docker-compose.yaml
 
 .PHONY: help
