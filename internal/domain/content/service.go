@@ -9,6 +9,7 @@ import (
 	"github.com/g-stro/content-service/internal/response"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type Service struct {
@@ -45,9 +46,9 @@ func (s *Service) getContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := struct {
-		Contents []*model.Content `json:"content"`
+		Content []*model.Content `json:"content"`
 	}{
-		Contents: content,
+		Content: content,
 	}
 
 	response.HttpSuccess(w, result, http.StatusOK, "content retrieved successfully")
@@ -64,7 +65,7 @@ func (s *Service) createContentWithDetails(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Convert request to domain model
-	content, err := s.ConvertCreateRequestDTOToModel(&req)
+	content, err := s.convertCreateRequestDTOToModel(&req)
 	if err != nil {
 		response.HttpFail(w, "failed to convert CreateRequestDTO to model", http.StatusBadRequest, "failed to convert CreateRequestDTO to model")
 		return
@@ -90,16 +91,19 @@ func (s *Service) convertContentTypeToID(contentType string) (int, error) {
 	return contentTypeID, nil
 }
 
-func (s *Service) ConvertCreateRequestDTOToModel(req *dto.ContentWithDetailsRequest) (*model.Content, error) {
+func (s *Service) convertCreateRequestDTOToModel(req *dto.ContentWithDetailsRequest) (*model.Content, error) {
 	if req == nil {
 		err := errors.New("request DTO is nil")
 		slog.Error("request DTO is nil", "error", err)
 		return nil, err
 	}
 
+	currTime := time.Now()
 	content := &model.Content{
-		Title:       req.Title,
-		Description: req.Description,
+		Title:            req.Title,
+		Description:      req.Description,
+		CreationDate:     currTime,
+		LastModifiedDate: currTime,
 	}
 
 	// Convert the content details

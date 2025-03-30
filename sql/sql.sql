@@ -1,3 +1,5 @@
+SET TIMEZONE = 'UTC';
+
 CREATE TABLE "content"
 (
     "id"                 SERIAL PRIMARY KEY,
@@ -22,3 +24,10 @@ CREATE TABLE "content_details"
     FOREIGN KEY ("content_id") REFERENCES "content" ("id"),
     FOREIGN KEY ("content_type_id") REFERENCES "content_type" ("id")
 );
+
+INSERT INTO content_type (id, name)
+VALUES
+    (1, 'text'),
+    (2, 'image'),
+    (3, 'video')
+ON CONFLICT DO NOTHING;

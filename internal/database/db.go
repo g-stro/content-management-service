@@ -25,7 +25,7 @@ func (conn *Connection) Close() {
 }
 
 func getDSN() string {
-	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
+	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=%s timezone=%s",
 		os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"),
-		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_SSL_MODE"))
+		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_SSL_MODE"), os.Getenv("DB_TIMEZONE"))
 }

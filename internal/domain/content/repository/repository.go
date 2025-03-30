@@ -5,7 +5,6 @@ import (
 	"github.com/g-stro/content-service/internal/database"
 	"github.com/g-stro/content-service/internal/domain/content/model"
 	"log/slog"
-	"time"
 )
 
 type ContentRepository interface {
@@ -54,6 +53,10 @@ func (r *PostgresContentRepository) GetAllContent() ([]*model.Content, error) {
 			return nil, err
 		}
 
+		// Normalize times to UTC
+		content.CreationDate = content.CreationDate.UTC()
+		content.LastModifiedDate = content.LastModifiedDate.UTC()
+
 		if _, exists := contentsMap[content.ID]; !exists {
 			content.Details = make([]*model.Detail, 0)
 			contentsMap[content.ID] = &content
@@ -85,10 +88,6 @@ func (r *PostgresContentRepository) CreateContentWithDetails(content *model.Cont
 			}
 		}
 	}()
-
-	currTime := time.Now()
-	content.CreationDate = currTime
-	content.LastModifiedDate = currTime
 
 	stmtContent := `
         INSERT INTO content (title, description, creation_date, last_modified_date)

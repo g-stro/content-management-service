@@ -8,8 +8,9 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+      DB_TIMEZONE: ${DB_TIMEZONE}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./sql/sql.sql:/docker-entrypoint-initdb.d/sql.sql
     restart: always
 
   content-service:
@@ -27,6 +28,7 @@ services:
       DB_HOST: postgres
       DB_PORT: ${DB_PORT}
       DB_SSL_MODE: ${DB_SSL_MODE}
+      DB_TIMEZONE: ${DB_TIMEZONE}
       SERVICE_PORT: ${SERVICE_PORT}
     depends_on:
       - postgres

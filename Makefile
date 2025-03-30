@@ -37,3 +37,19 @@ restart: down up
 logs:
 	@echo "Tailing logs..."
 	docker-compose --env-file $(ENV_FILE) -p $(PROJECT_NAME) logs -f
+
+# Run all tests
+.PHONY: test
+test: unit-tests integration-tests
+
+# Run unit tests
+.PHONY: unit-tests
+unit-tests:
+	@echo "Running unit tests..."
+	go test -v ./...
+
+# Run integration tests
+.PHONY: integration-tests
+integration-tests:
+	@echo "Running integration tests..."
+	docker-compose exec content-service go test -tags=integration ./...
