@@ -28,7 +28,7 @@ jobs:
       - name: Build Docker images
         run: |
           echo "Building Docker containers..."
-          docker-compose --env-file $ENV_FILE -p $PROJECT_NAME up --build -d
+          docker-compose --env-file .env.example -p content-service up --build -d
 
       - name: Run unit tests
         run: |
