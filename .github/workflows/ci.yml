@@ -10,7 +10,9 @@ jobs:
   build-and-test:
     name: Build, Unit Test, and Integration Test
     runs-on: ubuntu-latest
-  
+    env:
+      ENV_FILE: .env.example
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,18 +30,18 @@ jobs:
       - name: Build Docker images
         run: |
           echo "Building Docker containers..."
-          docker-compose --env-file .env.example -p content-service up --build -d
+          docker-compose --env-file $ENV_FILE -p content-service up --build -d
 
       - name: Wait for content-service to be healthy
         run: |
           echo "Waiting for content-service to be healthy..."
           for i in {1..30}; do
-          if docker-compose --env-file .env.example exec content-service curl -f http://localhost:8080/health; then
-           echo "Content service is healthy!"
-           exit 0
-          fi
-          echo "Waiting for service to start..."
-          sleep 2
+            if docker-compose --env-file $ENV_FILE exec -T content-service curl -f http://localhost:8080/health; then
+              echo "Content service is healthy!"
+              exit 0
+            fi
+            echo "Waiting for service to start..."
+            sleep 2
           done
           echo "Content service did not become healthy!"
           exit 1
