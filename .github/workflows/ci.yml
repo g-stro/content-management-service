@@ -38,7 +38,8 @@ jobs:
       - name: Run integration tests
         run: |
           echo "Running integration tests..."
-          make integration-tests
+          make integration-tests > integration-tests.log || \
+          (cat integration-tests.log && exit 1)
 
       - name: Tear down resources
         if: always()
