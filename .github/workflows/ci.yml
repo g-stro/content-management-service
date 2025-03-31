@@ -35,11 +35,25 @@ jobs:
           echo "Running unit tests..."
           make unit-tests
 
+      - name: Wait for content-service to be healthy
+        run: |
+          echo "Waiting for content-service to be healthy..."
+          for i in {1..30}; do
+          if docker-compose exec content-service curl -f http://localhost:8080/health; then
+           echo "Content service is healthy!"
+           exit 0
+          fi
+          echo "Waiting for service to start..."
+          sleep 2
+          done
+          echo "Content service did not become healthy!"
+          exit 1
+
       - name: Run integration tests
         run: |
           echo "Running integration tests..."
-          make integration-tests > integration-tests.log || \
-          (cat integration-tests.log && exit 1)
+          make integration-tests >integration-tests.log 2>&1 || \
+          (echo "--- Integration Test Log ---" && cat integration-tests.log && exit 1)
 
       - name: Tear down resources
         if: always()
