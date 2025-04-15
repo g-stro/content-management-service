@@ -202,6 +202,54 @@ func TestPostgresContentRepository_GetContentTypeID(t *testing.T) {
 	}
 }
 
+// TestPostgresContentRepository_GetContentTypeName tests the GetContentTypeName method of PostgresContentRepository
+// with data already seeded from sql/sql.sql
+func TestPostgresContentRepository_GetContentTypeName(t *testing.T) {
+	conn, err := database.NewConnection()
+	if err != nil {
+		t.Fatalf("failed to establish database connection: %v", err)
+	}
+	defer conn.DB.Close()
+
+	repo := NewPostgresContentRepository(conn)
+
+	// Define test cases
+	tests := []struct {
+		name         string
+		ID           int
+		expectedType string
+		wantErr      bool
+	}{
+		{
+			name:         "successful fetch",
+			ID:           1,
+			expectedType: "text",
+			wantErr:      false,
+		},
+		{
+			name:         "content type not found",
+			ID:           0,
+			expectedType: "",
+			wantErr:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Call repository method
+			id, err := repo.GetContentTypeName(tt.ID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetContentTypeName() error = %v, expected error = %v", err, tt.wantErr)
+				return
+			}
+
+			if id != tt.expectedType {
+				t.Errorf("GetContentTypeName() got = %v, expected = %v", id, tt.expectedType)
+			}
+		})
+	}
+}
+
 func printSlice[T any](items []*T) string {
 	var builder strings.Builder
 	for _, item := range items {

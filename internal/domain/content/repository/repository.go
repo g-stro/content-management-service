@@ -140,3 +140,14 @@ func (r *PostgresContentRepository) GetContentTypeID(contentType string) (int, e
 	}
 	return id, nil
 }
+
+func (r *PostgresContentRepository) GetContentTypeName(id int) (string, error) {
+	var name string
+	stmt := "SELECT name FROM content_type WHERE id = $1"
+	err := r.conn.DB.QueryRow(stmt, id).Scan(&name)
+	if err != nil {
+		slog.Error("failed to fetch ContentTypeName", "error", err)
+		return "", err
+	}
+	return name, nil
+}
