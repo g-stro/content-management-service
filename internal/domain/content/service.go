@@ -1,108 +1,64 @@
-package content
+package service
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/g-stro/content-service/internal/domain/content/dto"
 	"github.com/g-stro/content-service/internal/domain/content/model"
 	"github.com/g-stro/content-service/internal/domain/content/repository"
-	"github.com/g-stro/content-service/internal/response"
 	"log/slog"
-	"net/http"
 	"time"
 )
 
 type Service struct {
-	ctx  *http.ServeMux
 	repo *repository.PostgresContentRepository
 }
 
-func (s *Service) contentHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		s.getContent(w, r)
-	case "POST":
-		s.createContentWithDetails(w, r)
-	//case "PUT":
-	//s.updateContent(w, r)
-	//case "DELETE":
-	//s.deleteContent(w, r)
-	default:
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-	}
-}
-
-func NewContentService(c *http.ServeMux, repo *repository.PostgresContentRepository) *Service {
-	s := &Service{ctx: c, repo: repo}
-	s.ctx.HandleFunc("/content", s.contentHandler)
+func NewContentService(repo *repository.PostgresContentRepository) *Service {
+	s := &Service{repo: repo}
 	return s
 }
 
-func (s *Service) getContent(w http.ResponseWriter, r *http.Request) {
+func (s *Service) GetContent() ([]*dto.Content, error) {
 	content, err := s.repo.GetAllContent()
 	if err != nil {
-		response.HttpError(w, err, http.StatusInternalServerError, "failed to retrieve content")
-		return
+		//response.HttpError(w, err, http.StatusInternalServerError, "failed to retrieve content")
+		return nil, err
 	}
 
 	if len(content) == 0 {
-		response.HttpSuccess(w, map[string]interface{}{
-			"content": []dto.ContentWithDetailsResponse{},
-		}, http.StatusOK, "No content available")
-		return
+		return []*dto.Content{}, nil
 	}
 
-	resp := make([]*dto.ContentWithDetailsResponse, 0)
+	res := make([]*dto.Content, 0)
 	for _, c := range content {
 		contentDTO, err := s.convertContentModelToResponse(c)
 		if err != nil {
-			response.HttpError(w, err, http.StatusInternalServerError, "failed to convert content to response")
-			return
+			//response.HttpError(w, err, http.StatusInternalServerError, "failed to convert content to response")
+			return nil, err
 		}
-		resp = append(resp, contentDTO)
+		res = append(res, contentDTO)
 	}
 
-	result := struct {
-		Content []*dto.ContentWithDetailsResponse `json:"content"`
-	}{
-		Content: resp,
-	}
-
-	response.HttpSuccess(w, result, http.StatusOK, "content retrieved successfully")
+	return res, nil
 }
 
-func (s *Service) createContentWithDetails(w http.ResponseWriter, r *http.Request) {
-	// Validate the request
-	var req dto.ContentWithDetailsRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		response.HttpFail(
-			w, "invalid request data format", http.StatusBadRequest, "invalid request data format")
-		return
-	}
-
-	// Convert request to domain model
+func (s *Service) CreateContentWithDetails(req dto.Content) (*dto.Content, error) {
 	content, err := s.convertCreateContentRequestToModel(&req)
 	if err != nil {
-		response.HttpFail(w, "failed to convert CreateRequestDTO to model", http.StatusBadRequest, "failed to convert CreateRequestDTO to model")
-		return
+		return nil, errors.New("failed to convert CreateRequestDTO to model")
 	}
 
-	// Save the new content
 	content, err = s.repo.CreateContentWithDetails(content)
 	if err != nil {
-		response.HttpError(w, err, http.StatusInternalServerError, "failed to create content")
-		return
+		return nil, err
 	}
 
-	// Convert the saved content to response
 	resp, err := s.convertContentModelToResponse(content)
 	if err != nil {
-		response.HttpError(w, err, http.StatusInternalServerError, "failed to build response")
-		return
+		return nil, errors.New("failed to convert model to response DTO")
 	}
 
-	response.HttpSuccess(w, resp, http.StatusOK, "content created successfully")
+	return resp, nil
 }
 
 // convertContentTypeToID converts a content type string to content type ID integer
@@ -125,7 +81,7 @@ func (s *Service) convertContentTypeIDToName(contentTypeID int) (string, error) 
 	return contentTypeName, nil
 }
 
-func (s *Service) convertCreateContentRequestToModel(req *dto.ContentWithDetailsRequest) (*model.Content, error) {
+func (s *Service) convertCreateContentRequestToModel(req *dto.Content) (*model.Content, error) {
 	if req == nil {
 		err := errors.New("request DTO is nil")
 		slog.Error("request DTO is nil", "error", err)
@@ -159,14 +115,14 @@ func (s *Service) convertCreateContentRequestToModel(req *dto.ContentWithDetails
 	return content, nil
 }
 
-func (s *Service) convertContentModelToResponse(content *model.Content) (*dto.ContentWithDetailsResponse, error) {
+func (s *Service) convertContentModelToResponse(content *model.Content) (*dto.Content, error) {
 	if content == nil {
 		err := errors.New("content is nil")
 		slog.Error("content is nil", "error", err)
 		return nil, err
 	}
 
-	resp := &dto.ContentWithDetailsResponse{
+	resp := &dto.Content{
 		Title:       content.Title,
 		Description: content.Description,
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/g-stro/content-service/internal/database"
 	"github.com/g-stro/content-service/internal/domain/content"
+	"github.com/g-stro/content-service/internal/domain/content/handler"
 	"github.com/g-stro/content-service/internal/domain/content/repository"
 	"github.com/g-stro/content-service/middleware"
 	"log/slog"
@@ -16,6 +17,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
 	// Connect to database
 	conn, err := database.NewConnection()
 	if err != nil {
@@ -23,16 +25,23 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
-	// Create multiplexer/router
-	mux := http.NewServeMux()
-	// Create repositories
+
+	// Create repository
 	contentRepo := repository.NewPostgresContentRepository(conn)
-	// Register services
-	content.NewContentService(mux, contentRepo)
+	// Create service
+	contentService := service.NewContentService(contentRepo)
+	// Create handler
+	contentHandler := handler.NewContentHandler(contentService)
+
+	// Create multiplexer (router)
+	mux := http.NewServeMux()
+	// Register routes
+	contentHandler.RegisterRoutes(mux)
 	// Setup middleware
-	handler := middleware.CorsMiddleware(mux)
+	httpHandler := middleware.CorsMiddleware(mux)
+
 	// Create HTTP server
-	err = http.ListenAndServe(":"+port, handler)
+	err = http.ListenAndServe(":"+port, httpHandler)
 	if err != nil {
 		slog.Error("failed to start server", "error", err)
 		os.Exit(1)
