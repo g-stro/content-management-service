@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/g-stro/content-service/internal/database"
-	"github.com/g-stro/content-service/internal/domain/content"
-	"github.com/g-stro/content-service/internal/domain/content/handler"
-	"github.com/g-stro/content-service/internal/domain/content/repository"
-	"github.com/g-stro/content-service/middleware"
+	"github.com/g-stro/content-service/database"
+	"github.com/g-stro/content-service/internal/http/handler"
+	"github.com/g-stro/content-service/internal/http/middleware"
+	"github.com/g-stro/content-service/internal/repository"
+	"github.com/g-stro/content-service/internal/service"
 	"log/slog"
 	"net/http"
 	"os"

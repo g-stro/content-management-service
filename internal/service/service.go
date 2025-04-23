@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
-	"github.com/g-stro/content-service/internal/domain/content/dto"
-	"github.com/g-stro/content-service/internal/domain/content/model"
-	"github.com/g-stro/content-service/internal/domain/content/repository"
+	"github.com/g-stro/content-service/internal/dto"
+	"github.com/g-stro/content-service/internal/model"
+	"github.com/g-stro/content-service/internal/repository"
 	"log/slog"
 	"time"
 )

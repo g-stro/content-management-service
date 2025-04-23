@@ -4,13 +4,12 @@ package repository
 
 import (
 	"fmt"
+	"github.com/g-stro/content-service/database"
+	"github.com/g-stro/content-service/internal/model"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/g-stro/content-service/internal/database"
-	"github.com/g-stro/content-service/internal/domain/content/model"
 )
 
 var (

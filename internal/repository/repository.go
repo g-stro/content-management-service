@@ -2,8 +2,8 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/g-stro/content-service/internal/database"
-	"github.com/g-stro/content-service/internal/domain/content/model"
+	"github.com/g-stro/content-service/database"
+	"github.com/g-stro/content-service/internal/model"
 	"log/slog"
 )
 
