@@ -39,8 +39,8 @@ logs:
 	docker-compose --env-file $(ENV_FILE) -p $(PROJECT_NAME) logs -f
 
 # Run all tests
-.PHONY: test
-test: unit-tests integration-tests
+.PHONY: tests
+tests: unit-tests integration-tests
 
 # Run unit tests
 .PHONY: unit-tests

@@ -1,12 +1,16 @@
 package dto
 
+import "time"
+
 type Content struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Details     []Detail `json:"details"`
+	ID           int       `json:"id"`
+	Title        string    `json:"title"`
+	Description  string    `json:"description"`
+	CreationDate time.Time `json:"creation_date"`
+	Details      []Details `json:"details"`
 }
 
-type Detail struct {
+type Details struct {
 	ContentType string `json:"content_type"`
 	Value       string `json:"value"`
 }

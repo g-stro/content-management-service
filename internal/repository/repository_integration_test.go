@@ -60,7 +60,7 @@ func TestPostgresContentRepository_GetAllContent(t *testing.T) {
 			},
 			expected: []*model.Content{
 				{ID: 1, Title: testTitle, Description: testDescription, CreationDate: staticTimestamp,
-					LastModifiedDate: staticTimestamp, Details: []*model.Detail{{ID: 1, ContentID: 1, ContentTypeID: 1, Value: "test text"}}},
+					LastModifiedDate: staticTimestamp, Details: []*model.Details{{ID: 1, ContentID: 1, ContentTypeID: 1, Value: "test text"}}},
 			},
 			wantErr: false,
 		},
@@ -110,9 +110,9 @@ func TestPostgresContentRepository_CreateContentWithDetails(t *testing.T) {
 		{
 			name: "successful creation",
 			input: &model.Content{Title: testTitle, Description: testDescription, CreationDate: staticTimestamp,
-				LastModifiedDate: staticTimestamp, Details: []*model.Detail{{ContentTypeID: 1, Value: "test text"}}},
+				LastModifiedDate: staticTimestamp, Details: []*model.Details{{ContentTypeID: 1, Value: "test text"}}},
 			expected: &model.Content{ID: 2, Title: testTitle, Description: testDescription, CreationDate: staticTimestamp,
-				LastModifiedDate: staticTimestamp, Details: []*model.Detail{{ID: 2, ContentID: 2, ContentTypeID: 1, Value: "test text"}}},
+				LastModifiedDate: staticTimestamp, Details: []*model.Details{{ID: 2, ContentID: 2, ContentTypeID: 1, Value: "test text"}}},
 			wantErr: false,
 		},
 	}
@@ -122,7 +122,7 @@ func TestPostgresContentRepository_CreateContentWithDetails(t *testing.T) {
 			// Call repository method
 			content, err := repo.CreateContentWithDetails(tt.input)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CreateContentWithDetails() error = %v, expected error = %v", err, tt.wantErr)
+				t.Errorf("CreateContent() error = %v, expected error = %v", err, tt.wantErr)
 				return
 			}
 
@@ -134,28 +134,28 @@ func TestPostgresContentRepository_CreateContentWithDetails(t *testing.T) {
 			}()
 
 			// Compare Details slice
-			if !isSliceEqual(tt.expected.Details, content.Details, func(dExp, dAct *model.Detail) bool {
+			if !isSliceEqual(tt.expected.Details, content.Details, func(dExp, dAct *model.Details) bool {
 				if dExp == nil || dAct == nil {
 					return dExp == dAct
 				}
 				return reflect.DeepEqual(*dExp, *dAct)
 			}) {
-				t.Errorf("CreateContentWithDetails() got: \n%+v\nexpected:\n%+v", fmt.Sprintf("%+v\n", *content), fmt.Sprintf("%+v\n", tt.expected))
+				t.Errorf("CreateContent() got: \n%+v\nexpected:\n%+v", fmt.Sprintf("%+v\n", *content), fmt.Sprintf("%+v\n", tt.expected))
 			}
 
 			// Compare all other fields
 			tt.expected.Details = nil
 			content.Details = nil
 			if !reflect.DeepEqual(*content, *tt.expected) {
-				t.Errorf("CreateContentWithDetails() got: \n%+v\nexpected:\n%+v", fmt.Sprintf("%+v\n", *content), fmt.Sprintf("%+v\n", tt.expected))
+				t.Errorf("CreateContent() got: \n%+v\nexpected:\n%+v", fmt.Sprintf("%+v\n", *content), fmt.Sprintf("%+v\n", tt.expected))
 			}
 		})
 	}
 }
 
-// TestPostgresContentRepository_GetContentTypeID tests the GetContentTypeID method of PostgresContentRepository
+// TestPostgresContentRepository_GetContentTypeByName tests the GetContentTypeByName method of PostgresContentRepository
 // with data already seeded from sql/sql.sql
-func TestPostgresContentRepository_GetContentTypeID(t *testing.T) {
+func TestPostgresContentRepository_GetContentTypeByName(t *testing.T) {
 	conn, err := database.NewConnection()
 	if err != nil {
 		t.Fatalf("failed to establish database connection: %v", err)
@@ -166,44 +166,50 @@ func TestPostgresContentRepository_GetContentTypeID(t *testing.T) {
 
 	// Define test cases
 	tests := []struct {
-		name        string
-		contentType string
-		expectedID  int
-		wantErr     bool
+		name            string
+		contentTypeName string
+		expectedID      int
+		wantErr         bool
 	}{
 		{
-			name:        "successful fetch",
-			contentType: "text",
-			expectedID:  1,
-			wantErr:     false,
+			name:            "successful fetch",
+			contentTypeName: "text",
+			expectedID:      1,
+			wantErr:         false,
 		},
 		{
-			name:        "content type not found",
-			contentType: "Unknown",
-			expectedID:  0,
-			wantErr:     true,
+			name:            "content type not found",
+			contentTypeName: "Unknown",
+			expectedID:      0, // Expect nil response
+			wantErr:         false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call repository method
-			id, err := repo.GetContentTypeID(tt.contentType)
+			contentType, err := repo.GetContentTypeByName(tt.contentTypeName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetContentTypeID() error = %v, expected error = %v", err, tt.wantErr)
+				t.Errorf("GetContentTypeByName() error = %v, expected error = %v", err, tt.wantErr)
 				return
 			}
 
-			if id != tt.expectedID {
-				t.Errorf("GetContentTypeID() got = %v, expected = %v", id, tt.expectedID)
+			// Check nil case
+			if contentType == nil && tt.expectedID != 0 {
+				t.Errorf("GetContentTypeByName() got = nil, expected = %v", tt.expectedID)
+				return
+			}
+
+			if contentType != nil && contentType.ID != tt.expectedID {
+				t.Errorf("GetContentTypeByName() got = %v, expected = %v", contentType.ID, tt.expectedID)
 			}
 		})
 	}
 }
 
-// TestPostgresContentRepository_GetContentTypeName tests the GetContentTypeName method of PostgresContentRepository
+// TestPostgresContentRepository_GetContentTypeByID tests the GetContentTypeByID method of PostgresContentRepository
 // with data already seeded from sql/sql.sql
-func TestPostgresContentRepository_GetContentTypeName(t *testing.T) {
+func TestPostgresContentRepository_GetContentTypeByID(t *testing.T) {
 	conn, err := database.NewConnection()
 	if err != nil {
 		t.Fatalf("failed to establish database connection: %v", err)
@@ -215,35 +221,41 @@ func TestPostgresContentRepository_GetContentTypeName(t *testing.T) {
 	// Define test cases
 	tests := []struct {
 		name         string
-		ID           int
-		expectedType string
+		id           int
+		expectedName string
 		wantErr      bool
 	}{
 		{
 			name:         "successful fetch",
-			ID:           1,
-			expectedType: "text",
+			id:           1,
+			expectedName: "text",
 			wantErr:      false,
 		},
 		{
 			name:         "content type not found",
-			ID:           0,
-			expectedType: "",
-			wantErr:      true,
+			id:           0,
+			expectedName: "", // Expect nil response
+			wantErr:      false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Call repository method
-			id, err := repo.GetContentTypeName(tt.ID)
+			contentType, err := repo.GetContentTypeByID(tt.id)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetContentTypeName() error = %v, expected error = %v", err, tt.wantErr)
+				t.Errorf("GetContentTypeByID() error = %v, expected error = %v", err, tt.wantErr)
 				return
 			}
 
-			if id != tt.expectedType {
-				t.Errorf("GetContentTypeName() got = %v, expected = %v", id, tt.expectedType)
+			// Check nil case
+			if contentType == nil && tt.expectedName != "" {
+				t.Errorf("GetContentTypeByID() got = nil, expected = %v", tt.expectedName)
+				return
+			}
+
+			if contentType != nil && contentType.Name != tt.expectedName {
+				t.Errorf("GetContentTypeByID() got = %v, expected = %v", contentType.Name, tt.expectedName)
 			}
 		})
 	}
@@ -278,7 +290,7 @@ func isContentSliceEqual(expected, actual []*model.Content) bool {
 		}
 
 		// Compare Details slice
-		if !isSliceEqual(exp.Details, act.Details, func(dExp, dAct *model.Detail) bool {
+		if !isSliceEqual(exp.Details, act.Details, func(dExp, dAct *model.Details) bool {
 			if dExp == nil || dAct == nil {
 				return dExp == dAct
 			}

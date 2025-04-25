@@ -21,7 +21,6 @@ func NewContentService(repo *repository.PostgresContentRepository) *Service {
 func (s *Service) GetContent() ([]*dto.Content, error) {
 	content, err := s.repo.GetAllContent()
 	if err != nil {
-		//response.HttpError(w, err, http.StatusInternalServerError, "failed to retrieve content")
 		return nil, err
 	}
 
@@ -31,9 +30,8 @@ func (s *Service) GetContent() ([]*dto.Content, error) {
 
 	res := make([]*dto.Content, 0)
 	for _, c := range content {
-		contentDTO, err := s.convertContentModelToResponse(c)
+		contentDTO, err := s.convertContentModelToDTO(c)
 		if err != nil {
-			//response.HttpError(w, err, http.StatusInternalServerError, "failed to convert content to response")
 			return nil, err
 		}
 		res = append(res, contentDTO)
@@ -42,8 +40,8 @@ func (s *Service) GetContent() ([]*dto.Content, error) {
 	return res, nil
 }
 
-func (s *Service) CreateContentWithDetails(req dto.Content) (*dto.Content, error) {
-	content, err := s.convertCreateContentRequestToModel(&req)
+func (s *Service) CreateContent(req dto.Content) (*dto.Content, error) {
+	content, err := s.convertContentDTOToModel(&req)
 	if err != nil {
 		return nil, errors.New("failed to convert CreateRequestDTO to model")
 	}
@@ -53,7 +51,7 @@ func (s *Service) CreateContentWithDetails(req dto.Content) (*dto.Content, error
 		return nil, err
 	}
 
-	resp, err := s.convertContentModelToResponse(content)
+	resp, err := s.convertContentModelToDTO(content)
 	if err != nil {
 		return nil, errors.New("failed to convert model to response DTO")
 	}
@@ -61,70 +59,72 @@ func (s *Service) CreateContentWithDetails(req dto.Content) (*dto.Content, error
 	return resp, nil
 }
 
-// convertContentTypeToID converts a content type string to content type ID integer
-func (s *Service) convertContentTypeToID(contentType string) (int, error) {
-	contentTypeID, err := s.repo.GetContentTypeID(contentType)
+// convertContentTypeNameToID converts a content type name string to content type ID integer
+func (s *Service) convertContentTypeNameToID(name string) (int, error) {
+	ct, err := s.repo.GetContentTypeByName(name)
 	if err != nil {
 		slog.Error("failed to fetch ContentTypeID", "error", err)
 		return 0, err
 	}
-	return contentTypeID, nil
+	return ct.ID, nil
 }
 
 // convertContentTypeIDToName converts a content type ID integer to content type string
-func (s *Service) convertContentTypeIDToName(contentTypeID int) (string, error) {
-	contentTypeName, err := s.repo.GetContentTypeName(contentTypeID)
+func (s *Service) convertContentTypeIDToName(id int) (string, error) {
+	ct, err := s.repo.GetContentTypeByID(id)
 	if err != nil {
 		slog.Error("failed to fetch ContentTypeName", "error", err)
 		return "", err
 	}
-	return contentTypeName, nil
+	return ct.Name, nil
 }
 
-func (s *Service) convertCreateContentRequestToModel(req *dto.Content) (*model.Content, error) {
-	if req == nil {
+func (s *Service) convertContentDTOToModel(content *dto.Content) (*model.Content, error) {
+	if content == nil {
 		err := errors.New("request DTO is nil")
 		slog.Error("request DTO is nil", "error", err)
 		return nil, err
 	}
 
 	currTime := time.Now()
-	content := &model.Content{
-		Title:            req.Title,
-		Description:      req.Description,
+	res := &model.Content{
+		Title:            content.Title,
+		Description:      content.Description,
 		CreationDate:     currTime,
 		LastModifiedDate: currTime,
 	}
 
-	// Convert the content details
-	if req.Details != nil {
-		for _, d := range req.Details {
-			contentTypeID, err := s.convertContentTypeToID(d.ContentType)
+	// Convert the res details
+	if content.Details != nil {
+		for _, d := range content.Details {
+			contentTypeID, err := s.convertContentTypeNameToID(d.ContentType)
 			if err != nil {
-				slog.Error("failed to convert content type to ID", "error", err)
+				slog.Error("failed to convert res type to ID", "error", err)
 				return nil, err
 			}
-			detail := model.Detail{
+			detail := model.Details{
 				ContentTypeID: contentTypeID,
 				Value:         d.Value,
 			}
-			content.Details = append(content.Details, &detail)
+			res.Details = append(res.Details, &detail)
 		}
 	}
 
-	return content, nil
+	return res, nil
 }
 
-func (s *Service) convertContentModelToResponse(content *model.Content) (*dto.Content, error) {
+func (s *Service) convertContentModelToDTO(content *model.Content) (*dto.Content, error) {
 	if content == nil {
 		err := errors.New("content is nil")
 		slog.Error("content is nil", "error", err)
 		return nil, err
 	}
 
-	resp := &dto.Content{
-		Title:       content.Title,
-		Description: content.Description,
+	res := &dto.Content{
+		ID:           content.ID,
+		Title:        content.Title,
+		CreationDate: content.CreationDate,
+		Description:  content.Description,
 	}
 
 	// Convert the content details
@@ -135,13 +135,13 @@ func (s *Service) convertContentModelToResponse(content *model.Content) (*dto.Co
 				slog.Error("failed to convert ID to content type", "error", err)
 				return nil, err
 			}
-			detail := dto.Detail{
+			detail := dto.Details{
 				ContentType: contentType,
 				Value:       d.Value,
 			}
-			resp.Details = append(resp.Details, detail)
+			res.Details = append(res.Details, detail)
 		}
 	}
 
-	return resp, nil
+	return res, nil
 }

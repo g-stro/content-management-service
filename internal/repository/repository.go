@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/g-stro/content-service/database"
 	"github.com/g-stro/content-service/internal/model"
 	"log/slog"
@@ -41,10 +42,10 @@ func (r *PostgresContentRepository) GetAllContent() ([]*model.Content, error) {
 		}
 	}(rows)
 
-	var contentsMap = make(map[any]*model.Content)
+	var contentMap = make(map[any]*model.Content)
 	for rows.Next() {
 		var content model.Content
-		var contentDetail model.Detail
+		var contentDetail model.Details
 		err = rows.Scan(
 			&content.ID, &content.Title, &content.Description, &content.CreationDate, &content.LastModifiedDate,
 			&contentDetail.ID, &contentDetail.ContentID, &contentDetail.ContentTypeID, &contentDetail.Value)
@@ -57,15 +58,15 @@ func (r *PostgresContentRepository) GetAllContent() ([]*model.Content, error) {
 		content.CreationDate = content.CreationDate.UTC()
 		content.LastModifiedDate = content.LastModifiedDate.UTC()
 
-		if _, exists := contentsMap[content.ID]; !exists {
-			content.Details = make([]*model.Detail, 0)
-			contentsMap[content.ID] = &content
+		if _, exists := contentMap[content.ID]; !exists {
+			content.Details = make([]*model.Details, 0)
+			contentMap[content.ID] = &content
 		}
-		contentsMap[content.ID].Details = append(contentsMap[content.ID].Details, &contentDetail)
+		contentMap[content.ID].Details = append(contentMap[content.ID].Details, &contentDetail)
 	}
 
 	var result []*model.Content
-	for _, content := range contentsMap {
+	for _, content := range contentMap {
 		result = append(result, content)
 	}
 
@@ -130,24 +131,30 @@ func (r *PostgresContentRepository) CreateContentWithDetails(content *model.Cont
 	return content, nil
 }
 
-func (r *PostgresContentRepository) GetContentTypeID(contentType string) (int, error) {
-	var id int
-	stmt := "SELECT id FROM content_type WHERE name = $1"
-	err := r.conn.DB.QueryRow(stmt, contentType).Scan(&id)
+func (r *PostgresContentRepository) GetContentTypeByName(name string) (*model.ContentType, error) {
+	var contentType model.ContentType
+	query := "SELECT id, name FROM content_type WHERE name = $1"
+	err := r.conn.DB.QueryRow(query, name).Scan(&contentType.ID, &contentType.Name)
 	if err != nil {
-		slog.Error("failed to fetch ContentTypeID", "error", err)
-		return 0, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		slog.Error("failed to fetch ContentType", "error", err)
+		return nil, err
 	}
-	return id, nil
+	return &contentType, nil
 }
 
-func (r *PostgresContentRepository) GetContentTypeName(id int) (string, error) {
-	var name string
-	stmt := "SELECT name FROM content_type WHERE id = $1"
-	err := r.conn.DB.QueryRow(stmt, id).Scan(&name)
+func (r *PostgresContentRepository) GetContentTypeByID(id int) (*model.ContentType, error) {
+	var contentType model.ContentType
+	query := "SELECT id, name FROM content_type WHERE id = $1"
+	err := r.conn.DB.QueryRow(query, id).Scan(&contentType.ID, &contentType.Name)
 	if err != nil {
-		slog.Error("failed to fetch ContentTypeName", "error", err)
-		return "", err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		slog.Error("failed to fetch ContentType", "error", err)
+		return nil, err
 	}
-	return name, nil
+	return &contentType, nil
 }

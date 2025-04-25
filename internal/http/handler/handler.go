@@ -40,15 +40,35 @@ func (h *Handler) getContent(w http.ResponseWriter, r *http.Request) {
 
 	if len(content) == 0 {
 		response.HttpSuccess(w, map[string]interface{}{
-			"content": []dto.Content{},
+			"content": []response.GetContent{},
 		}, http.StatusOK, "No content available")
 		return
 	}
 
+	contentResp := make([]response.GetContent, 0)
+	for _, c := range content {
+		details := make([]response.Details, 0)
+		for _, d := range c.Details {
+			dr := response.Details{
+				ContentType: d.ContentType,
+				Value:       d.Value,
+			}
+			details = append(details, dr)
+		}
+
+		cr := response.GetContent{
+			ID:          c.ID,
+			Title:       c.Title,
+			Description: c.Description,
+			Details:     details,
+		}
+		contentResp = append(contentResp, cr)
+	}
+
 	resp := struct {
-		Content []*dto.Content `json:"content"`
+		Content []response.GetContent `json:"content"`
 	}{
-		Content: content,
+		Content: contentResp,
 	}
 
 	response.HttpSuccess(w, resp, http.StatusOK, "content retrieved successfully")
@@ -63,16 +83,18 @@ func (h *Handler) createContent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, err := h.svc.CreateContentWithDetails(req)
+	content, err := h.svc.CreateContent(req)
 	if err != nil {
 		response.HttpError(w, err, http.StatusInternalServerError, "failed to create content")
 		return
 	}
 
-	resp := struct {
-		Content *dto.Content `json:"content"`
-	}{
-		Content: content,
+	formattedCreationDate := content.CreationDate.Format("2006-01-02 15:04:05")
+
+	resp := response.CreateContent{
+		ID:           content.ID,
+		Title:        content.Title,
+		CreationDate: formattedCreationDate,
 	}
 
 	response.HttpSuccess(w, resp, http.StatusCreated, "content created successfully")
