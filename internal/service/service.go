@@ -10,10 +10,10 @@ import (
 )
 
 type Service struct {
-	repo *repository.PostgresContentRepository
+	repo repository.ContentRepository
 }
 
-func NewContentService(repo *repository.PostgresContentRepository) *Service {
+func NewContentService(repo repository.ContentRepository) *Service {
 	s := &Service{repo: repo}
 	return s
 }

@@ -11,7 +11,8 @@ import (
 type ContentRepository interface {
 	GetAllContent() ([]*model.Content, error)
 	CreateContentWithDetails(content *model.Content) (*model.Content, error)
-	GetContentTypeID(contentType string) (string, error)
+	GetContentTypeByName(name string) (*model.ContentType, error)
+	GetContentTypeByID(id int) (*model.ContentType, error)
 }
 
 type PostgresContentRepository struct {
