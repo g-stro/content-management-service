@@ -29,7 +29,7 @@ func main() {
 	// Create repository
 	contentRepo := repository.NewPostgresContentRepository(conn)
 	// Create service
-	contentService := service.NewContentService(contentRepo)
+	contentService := service.NewContentService(contentRepo, nil)
 	// Create handler
 	contentHandler := handler.NewContentHandler(contentService)
 

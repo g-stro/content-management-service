@@ -9,13 +9,22 @@ import (
 	"time"
 )
 
+type clock func() time.Time
+
 type Service struct {
-	repo repository.ContentRepository
+	repo  repository.ContentRepository
+	clock clock
 }
 
-func NewContentService(repo repository.ContentRepository) *Service {
-	s := &Service{repo: repo}
-	return s
+func NewContentService(repo repository.ContentRepository, clock clock) *Service {
+	if clock == nil {
+		clock = time.Now // Default
+	}
+
+	return &Service{
+		repo:  repo,
+		clock: clock,
+	}
 }
 
 func (s *Service) GetContent() ([]*dto.Content, error) {
@@ -86,7 +95,7 @@ func (s *Service) convertContentDTOToModel(content *dto.Content) (*model.Content
 		return nil, err
 	}
 
-	currTime := time.Now()
+	currTime := s.clock()
 	res := &model.Content{
 		Title:            content.Title,
 		Description:      content.Description,
