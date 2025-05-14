@@ -74,7 +74,7 @@ func TestService_GetContent(t *testing.T) {
 				MockedContent: []*model.Content{
 					{
 						ID:          1,
-						Title:       "Test Title",
+						Name:        "Test Name",
 						Description: "Test Description",
 						Details:     nil,
 					},
@@ -83,7 +83,7 @@ func TestService_GetContent(t *testing.T) {
 			expected: []*dto.Content{
 				{
 					ID:          1,
-					Title:       "Test Title",
+					Name:        "Test Name",
 					Description: "Test Description",
 					Details:     nil,
 				},
@@ -137,13 +137,13 @@ func TestService_CreateContent(t *testing.T) {
 		{
 			name: "successful creation",
 			input: dto.Content{
-				Title:       "Test Title",
+				Name:        "Test Name",
 				Description: "Test Description",
 			},
 			repoMock: &MockRepository{},
 			expected: &dto.Content{
 				ID:           1,
-				Title:        "Test Title",
+				Name:         "Test Name",
 				Description:  "Test Description",
 				CreationDate: fixedTime,
 			},
@@ -152,7 +152,7 @@ func TestService_CreateContent(t *testing.T) {
 		{
 			name: "repository error creating content",
 			input: dto.Content{
-				Title:       "Test Title",
+				Name:        "Test Name",
 				Description: "Test Description",
 			},
 			repoMock: &MockRepository{

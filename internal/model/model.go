@@ -4,7 +4,7 @@ import "time"
 
 type Content struct {
 	ID               int       `db:"id"`
-	Title            string    `db:"title"`
+	Name             string    `db:"name"`
 	Description      string    `db:"description"`
 	CreationDate     time.Time `db:"creation_date"`
 	LastModifiedDate time.Time `db:"last_modified_date"`

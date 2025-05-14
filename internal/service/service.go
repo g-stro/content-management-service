@@ -97,7 +97,7 @@ func (s *Service) convertContentDTOToModel(content *dto.Content) (*model.Content
 
 	currTime := s.clock()
 	res := &model.Content{
-		Title:            content.Title,
+		Name:             content.Name,
 		Description:      content.Description,
 		CreationDate:     currTime,
 		LastModifiedDate: currTime,
@@ -131,7 +131,7 @@ func (s *Service) convertContentModelToDTO(content *model.Content) (*dto.Content
 
 	res := &dto.Content{
 		ID:           content.ID,
-		Title:        content.Title,
+		Name:         content.Name,
 		CreationDate: content.CreationDate,
 		Description:  content.Description,
 	}

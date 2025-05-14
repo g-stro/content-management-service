@@ -14,7 +14,7 @@ import (
 
 var (
 	staticTimestamp = time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
-	testTitle       = "test title"
+	testName        = "test name"
 	testDescription = "test description"
 )
 
@@ -38,10 +38,10 @@ func TestPostgresContentRepository_GetAllContent(t *testing.T) {
 			setup: func() error {
 				var id int
 				err := conn.DB.QueryRow(
-					`INSERT INTO content (title, description, creation_date, last_modified_date) 
+					`INSERT INTO content (name, description, creation_date, last_modified_date) 
 					VALUES ($1, $2, $3, $4) 
 					RETURNING id`,
-					testTitle, testDescription, staticTimestamp, staticTimestamp).Scan(&id)
+					testName, testDescription, staticTimestamp, staticTimestamp).Scan(&id)
 				if err != nil {
 					return err
 				}
@@ -59,7 +59,7 @@ func TestPostgresContentRepository_GetAllContent(t *testing.T) {
 				return err
 			},
 			expected: []*model.Content{
-				{ID: 1, Title: testTitle, Description: testDescription, CreationDate: staticTimestamp,
+				{ID: 1, Name: testName, Description: testDescription, CreationDate: staticTimestamp,
 					LastModifiedDate: staticTimestamp, Details: []*model.Details{{ID: 1, ContentID: 1, ContentTypeID: 1, Value: "test text"}}},
 			},
 			wantErr: false,
@@ -109,9 +109,9 @@ func TestPostgresContentRepository_CreateContentWithDetails(t *testing.T) {
 	}{
 		{
 			name: "successful creation",
-			input: &model.Content{Title: testTitle, Description: testDescription, CreationDate: staticTimestamp,
+			input: &model.Content{Name: testName, Description: testDescription, CreationDate: staticTimestamp,
 				LastModifiedDate: staticTimestamp, Details: []*model.Details{{ContentTypeID: 1, Value: "test text"}}},
-			expected: &model.Content{ID: 2, Title: testTitle, Description: testDescription, CreationDate: staticTimestamp,
+			expected: &model.Content{ID: 2, Name: testName, Description: testDescription, CreationDate: staticTimestamp,
 				LastModifiedDate: staticTimestamp, Details: []*model.Details{{ID: 2, ContentID: 2, ContentTypeID: 1, Value: "test text"}}},
 			wantErr: false,
 		},

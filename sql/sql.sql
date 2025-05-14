@@ -3,7 +3,7 @@ SET TIMEZONE = 'UTC';
 CREATE TABLE "content"
 (
     "id"                 SERIAL PRIMARY KEY,
-    "title"              VARCHAR(255),
+    "name" VARCHAR(255),
     "description"        TEXT,
     "creation_date"      TIMESTAMP,
     "last_modified_date" TIMESTAMP

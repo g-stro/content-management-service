@@ -58,7 +58,7 @@ func (h *Handler) getContent(w http.ResponseWriter, r *http.Request) {
 
 		cr := response.GetContent{
 			ID:          c.ID,
-			Title:       c.Title,
+			Name:        c.Name,
 			Description: c.Description,
 			Details:     details,
 		}
@@ -93,7 +93,7 @@ func (h *Handler) createContent(w http.ResponseWriter, r *http.Request) {
 
 	resp := response.CreateContent{
 		ID:           content.ID,
-		Title:        content.Title,
+		Name:         content.Name,
 		CreationDate: formattedCreationDate,
 	}
 

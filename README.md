@@ -86,7 +86,7 @@ DB_TIMEZONE=UTC
        "content": [
          {
            "id": 1,
-           "title": "Sample Title",
+           "name": "Sample Name",
            "description": "Sample Description",
            "details": [
              {
@@ -105,7 +105,7 @@ DB_TIMEZONE=UTC
    Example request body:
    ```json
    {
-     "title": "New Content",
+     "name": "New Content",
      "description": "Details about new content",
      "details": [
        {
@@ -121,7 +121,7 @@ DB_TIMEZONE=UTC
      "status": "success",
      "data": {
        "id": 1,
-       "title": "New Content",
+       "name": "New Content",
        "created_at": "2025-05-13 10:52:07"
      }
    }

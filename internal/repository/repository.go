@@ -24,7 +24,7 @@ func NewPostgresContentRepository(c *database.Connection) *PostgresContentReposi
 }
 
 func (r *PostgresContentRepository) GetAllContent() ([]*model.Content, error) {
-	query := `SELECT c.id, c.title, c.description, c.creation_date, c.last_modified_date,
+	query := `SELECT c.id, c.name, c.description, c.creation_date, c.last_modified_date,
                  cd.id, cd.content_id, cd.content_type_id, cd.value
                  FROM content c 
                  JOIN content_details cd ON c.id = cd.content_id
@@ -48,7 +48,7 @@ func (r *PostgresContentRepository) GetAllContent() ([]*model.Content, error) {
 		var content model.Content
 		var contentDetail model.Details
 		err = rows.Scan(
-			&content.ID, &content.Title, &content.Description, &content.CreationDate, &content.LastModifiedDate,
+			&content.ID, &content.Name, &content.Description, &content.CreationDate, &content.LastModifiedDate,
 			&contentDetail.ID, &contentDetail.ContentID, &contentDetail.ContentTypeID, &contentDetail.Value)
 		if err != nil {
 			slog.Error("failed to scan rows into content and contentDetail structures", "error", err)
@@ -92,13 +92,13 @@ func (r *PostgresContentRepository) CreateContentWithDetails(content *model.Cont
 	}()
 
 	stmtContent := `
-        INSERT INTO content (title, description, creation_date, last_modified_date)
+        INSERT INTO content (name, description, creation_date, last_modified_date)
         VALUES ($1, $2, $3, $4)
         RETURNING id`
 
 	var id int
 	err = tx.QueryRow(
-		stmtContent, content.Title, content.Description, content.CreationDate, content.LastModifiedDate).Scan(&id)
+		stmtContent, content.Name, content.Description, content.CreationDate, content.LastModifiedDate).Scan(&id)
 	if err != nil {
 		slog.Error("failed to execute query and scan result", "error", err)
 		return nil, err

@@ -4,7 +4,7 @@ import "time"
 
 type Content struct {
 	ID           int       `json:"id"`
-	Title        string    `json:"title"`
+	Name         string    `json:"name"`
 	Description  string    `json:"description"`
 	CreationDate time.Time `json:"creation_date"`
 	Details      []Details `json:"details"`
