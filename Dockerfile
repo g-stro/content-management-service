@@ -12,10 +12,10 @@ RUN go mod download
 COPY . ./
 
 # Build the Go application
-RUN go build -o content-service ./cmd/server
+RUN go build -o content-management-service ./cmd/server
 
 # Expose the service port
 EXPOSE ${SERVICE_PORT}
 
 # Run the application
-CMD ["./content-service"]
+CMD ["./content-management-service"]

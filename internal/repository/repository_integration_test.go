@@ -4,8 +4,8 @@ package repository
 
 import (
 	"fmt"
-	"github.com/g-stro/content-service/database"
-	"github.com/g-stro/content-service/internal/model"
+	"github.com/g-stro/content-management-service/database"
+	"github.com/g-stro/content-management-service/internal/model"
 	"reflect"
 	"strings"
 	"testing"

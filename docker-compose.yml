@@ -13,12 +13,12 @@ services:
       - ./sql/sql.sql:/docker-entrypoint-initdb.d/sql.sql
     restart: always
 
-  content-service:
+  content-management-service:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: content_service_container
-    image: content-service
+    image: content-management-service
     ports:
       - '${SERVICE_PORT}:${SERVICE_PORT}'
     environment:

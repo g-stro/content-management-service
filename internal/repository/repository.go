@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"github.com/g-stro/content-service/database"
-	"github.com/g-stro/content-service/internal/model"
+	"github.com/g-stro/content-management-service/database"
+	"github.com/g-stro/content-management-service/internal/model"
 	"log/slog"
 )
 

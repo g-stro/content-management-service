@@ -28,8 +28,8 @@ This repository implements a **content management microservice** in Go, built fo
 
 ### **1. Clone the Repository**
 ```bash
-git clone https://github.com/g-stro/content-service.git
-cd content-service
+git clone https://github.com/g-stro/content-management-service.git
+cd content-management-service
 ```
 
 ---

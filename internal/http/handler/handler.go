@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/g-stro/content-service/internal/dto"
-	"github.com/g-stro/content-service/internal/http/response"
-	"github.com/g-stro/content-service/internal/service"
+	"github.com/g-stro/content-management-service/internal/dto"
+	"github.com/g-stro/content-management-service/internal/http/response"
+	"github.com/g-stro/content-management-service/internal/service"
 	"net/http"
 )
 

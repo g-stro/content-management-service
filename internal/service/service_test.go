@@ -2,8 +2,8 @@ package service
 
 import (
 	"errors"
-	"github.com/g-stro/content-service/internal/dto"
-	"github.com/g-stro/content-service/internal/model"
+	"github.com/g-stro/content-management-service/internal/dto"
+	"github.com/g-stro/content-management-service/internal/model"
 	"reflect"
 	"testing"
 	"time"

@@ -1,4 +1,4 @@
-module github.com/g-stro/content-service
+module github.com/g-stro/content-management-service
 
 go 1.22
 

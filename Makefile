@@ -1,4 +1,4 @@
-PROJECT_NAME = content-service
+PROJECT_NAME = content-management-service
 ENV_FILE = .env.example
 COMPOSE_FILE = docker-compose.yaml
 
@@ -52,4 +52,4 @@ unit-tests:
 .PHONY: integration-tests
 integration-tests:
 	@echo "Running integration tests..."
-	docker-compose --env-file $(ENV_FILE) exec -T content-service go test -v -tags=integration ./...
+	docker-compose --env-file $(ENV_FILE) exec -T content-management-service go test -v -tags=integration ./...
